@@ -31,12 +31,12 @@
 
 int main(void)
 {
-	// Initialize debug output.
+	// Initialise debug output.
 	init_debug_uart1();
 	// If you don't want spam, replace 2 with 0.
 	set_debug(2);
 
-	// Initialize and format filesystem
+	// Initialise and format filesystem
 	init_eepromfs();
 
 	printf("== Writing 'Hello World!' to file 6...\n");
