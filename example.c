@@ -42,7 +42,7 @@ int main(void)
 	printf("== Writing 'Hello World!' to file 6...\n");
 	file_handle_t fh = open_for_write(6);
 	fdata_t contents[] = "Hello World!\n\0";
-	write(&fh, contents, sizeof(contents) - 1);
+	write(&fh, contents, sizeof(contents));
 	close(&fh);
 
 	printf("\n== Reading file 6...\n");
@@ -61,14 +61,14 @@ int main(void)
 	printf("\n== Writing 'Lorem ipsum ' to file 7...\n");
 	fh = open_for_write(7);
 	fdata_t lipsum[] = "Lorem ipsum ";
-	write(&fh, lipsum, sizeof(lipsum) - 1);
+	write(&fh, lipsum, sizeof(lipsum));
 	close(&fh);
 
 	printf("\n== Appending 'dolor sit amet...' to file 7...\n");
 	fh = open_for_append(7);
 	fdata_t lipsum_more[] =
 			"dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\0";
-	write(&fh, lipsum_more, sizeof(lipsum_more) - 1);
+	write(&fh, lipsum_more, sizeof(lipsum_more));
 	close(&fh);
 
 	printf("\n== Reading file 7...\n");
@@ -80,7 +80,7 @@ int main(void)
 	printf("\n== Appending 'cake! ' to file 1337...\n");
 	fh = open_for_append(1337);
 	fdata_t cake[] = "cake! ";
-	write(&fh, cake, sizeof(cake) - 1);
+	write(&fh, cake, sizeof(cake));
 	close(&fh);
 
 	printf("\n== Reading file 1337...\n");
