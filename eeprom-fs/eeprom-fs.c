@@ -35,6 +35,8 @@
 
 #include "eeprom-fs.h"
 
+#define NULL -1
+
 void* get_block_pointer(lba_t block);
 lba_t last_block_in_chain(lba_t block);
 lba_t write_block_data(fdata_t* data);
@@ -155,7 +157,7 @@ void format_eepromfs(format_type_t f)
 
 	// Set all allocations to 'null'
 	file_alloc_t null;
-	null.data_block = -1;
+	null.data_block = NULL;
 	null.filesize = 0;
 	for (uint16_t i = 0; i < EEPROM_FS_MAX_FILES; i++)
 	{
@@ -205,8 +207,8 @@ file_handle_t open_for_write(fname_t filename)
 	fh.filename = filename;
 	fh.filesize = 0;
 	fh.type = FH_WRITE;
-	fh.first_block = -1;
-	fh.last_block = -1;
+	fh.first_block = NULL;
+	fh.last_block = NULL;
 
 	_fs_debug1("File ready.\n");
 
@@ -228,8 +230,8 @@ file_handle_t open_for_append(fname_t filename)
 	fh.filename = filename;
 	fh.filesize = alloc_table[filename].filesize;
 	fh.type = FH_APPEND;
-	fh.first_block = -1;
-	fh.last_block = -1;
+	fh.first_block = NULL;
+	fh.last_block = NULL;
 
 	_fs_debug1("File ready.\n");
 
@@ -252,9 +254,9 @@ file_handle_t open_for_read(fname_t filename)
 	fh.filesize = alloc_table[filename].filesize;
 	fh.type = FH_READ;
 	fh.first_block = alloc_table[filename].data_block;
-	fh.last_block = -1;
+	fh.last_block = NULL;
 
-	if (fh.first_block == -1)
+	if (fh.first_block == NULL)
 	{
 		_fs_error("File %d not found.\n", filename);
 	}
@@ -315,7 +317,7 @@ void close(file_handle_t* fh)
 	_fs_debug2("Marking end of file %d.\n", fh->filename);
 
 	// Mark end of file
-	relink(fh->last_block, -1);
+	relink(fh->last_block, NULL);
 
 	_fs_debug1("File %d successfully finalised.\n", fh->filename);
 }
@@ -467,7 +469,7 @@ void read(file_handle_t* fh, fdata_t* buf)
 				buf[i * EEPROM_FS_BLOCK_DATA_SIZE + j] = block.data[j];
 			}
 			i++;
-		} while (block.next_block != -1);
+		} while (block.next_block != NULL);
 	}
 	else
 	{
@@ -497,7 +499,7 @@ void delete(fname_t filename)
 	// Delete from allocation table
 
 	alloc_table[filename].filesize = 0;
-	alloc_table[filename].data_block = -1;
+	alloc_table[filename].data_block = NULL;
 
 	void* alloc_offset = (void*) (EEPROM_FS_START + EEPROM_FS_ALLOC_TABLE_OFFSET
 			+ filename * sizeof(file_alloc_t));
@@ -522,7 +524,7 @@ void* get_block_pointer(lba_t block)
  * Returns the last logical block of a block chain
  *
  * \param block Any block in the block chain to look up
- * \return Address of last block in the block chain, or -1 for failure
+ * \return Address of last block in the block chain, or NULL for failure
  */
 lba_t last_block_in_chain(lba_t block)
 {
@@ -538,7 +540,7 @@ lba_t last_block_in_chain(lba_t block)
 			_fs_debug4("checking... %d\n", block);
 			eeprom_read_block((void*) &current_block, get_block_pointer(block),
 			EEPROM_FS_BLOCK_SIZE);
-		} while (current_block.next_block != -1);
+		} while (current_block.next_block != NULL);
 
 		_fs_debug3("Last block in chain: %d\n", block);
 
@@ -547,7 +549,7 @@ lba_t last_block_in_chain(lba_t block)
 	else
 	{
 		_fs_error("Block %d is not part of a block chain.\n", block);
-		return -1;
+		return NULL;
 	}
 }
 
@@ -556,7 +558,7 @@ lba_t last_block_in_chain(lba_t block)
  * Advances the cached next_free_block
  *
  * \param data Block data to write
- * \return Address of block written, or -1 if failure
+ * \return Address of block written, or NULL if failure
  */
 lba_t write_block_data(fdata_t* data)
 {
@@ -588,7 +590,7 @@ lba_t write_block_data(fdata_t* data)
 	else
 	{
 		_fs_error("Attempted to write to invalid block %d.\n", write_to);
-		return -1;
+		return NULL;
 	}
 }
 
@@ -677,7 +679,7 @@ void relink(lba_t block, lba_t target)
 {
 	if (block >= 0 && block < (lba_t) EEPROM_FS_NUM_BLOCKS)
 	{
-		if (target >= -1 && target < (lba_t) EEPROM_FS_NUM_BLOCKS)
+		if (target >= NULL && target < (lba_t) EEPROM_FS_NUM_BLOCKS)
 		{
 			_fs_debug3("Relinking block %d -> %d...", block, target);
 
